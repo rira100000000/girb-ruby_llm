@@ -98,9 +98,10 @@ girb
 
 ### 手動設定
 
-Rubyでプロバイダーを手動で設定できます:
+`~/.irbrc` でプロバイダーを手動で設定できます:
 
 ```ruby
+# ~/.irbrc
 require 'girb-ruby_llm'
 
 RubyLLM.configure do |config|

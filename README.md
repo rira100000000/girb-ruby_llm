@@ -1,5 +1,7 @@
 # girb-ruby_llm
 
+[日本語版 README](README_ja.md)
+
 RubyLLM provider for [girb](https://github.com/rira100000000/girb) (AI-powered IRB assistant).
 
 This gem allows you to use multiple LLM providers (OpenAI, Anthropic, Google Gemini, Ollama, and more) through the [RubyLLM](https://github.com/crmne/ruby_llm) unified API.
@@ -98,9 +100,10 @@ girb
 
 ### Manual Configuration
 
-You can configure the provider manually in Ruby:
+You can configure the provider manually in your `~/.irbrc`:
 
 ```ruby
+# ~/.irbrc
 require 'girb-ruby_llm'
 
 RubyLLM.configure do |config|
