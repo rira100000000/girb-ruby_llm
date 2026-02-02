@@ -9,20 +9,41 @@
 Gemfileに追加:
 
 ```ruby
+gem 'girb'
 gem 'girb-ruby_llm'
-```
-
-実行:
-
-```bash
-bundle install
 ```
 
 または直接インストール:
 
 ```bash
-gem install girb-ruby_llm
+gem install girb girb-ruby_llm
 ```
+
+## セットアップ
+
+プロバイダー、モデル、APIキーを設定:
+
+```bash
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=gemini-2.5-flash  # 使用するモデルを指定
+export GEMINI_API_KEY=your-api-key  # または他のプロバイダーのAPIキー
+```
+
+girbを起動:
+
+```bash
+girb
+```
+
+### 通常のirbで使用する場合
+
+`~/.irbrc` に追加:
+
+```ruby
+require 'girb-ruby_llm'
+```
+
+通常の `irb` コマンドで使用できます。
 
 ## 設定
 
@@ -66,6 +87,8 @@ APIキーまたはエンドポイントを環境変数として設定します:
 ### OpenAIを使用
 
 ```bash
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=gpt-4o
 export OPENAI_API_KEY="sk-..."
 girb
 ```
@@ -73,6 +96,8 @@ girb
 ### Anthropic Claudeを使用
 
 ```bash
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=claude-sonnet-4-20250514
 export ANTHROPIC_API_KEY="sk-ant-..."
 girb
 ```
@@ -83,48 +108,44 @@ girb
 # まずOllamaを起動
 ollama serve
 
-# APIベースURLを設定
-export OLLAMA_API_BASE="http://localhost:11434"
+# プロバイダー、モデル、APIベースURLを設定
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=llama3.2:latest
+export OLLAMA_API_BASE="http://localhost:11434/v1"
 girb
 ```
 
 ### OpenAI互換API（LM Studio、vLLMなど）を使用
 
 ```bash
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=your-model-name
 export OPENAI_API_KEY="not-needed"  # 空でない値が必要な場合
 export OPENAI_API_BASE="http://localhost:1234/v1"
 girb
 ```
 
-### 手動設定
+### 詳細設定
 
-`~/.irbrc` でプロバイダーを手動で設定できます:
+より細かい制御が必要な場合、`~/.irbrc`でGirbを設定できます:
 
 ```ruby
 # ~/.irbrc
 require 'girb-ruby_llm'
 
-RubyLLM.configure do |config|
-  config.ollama_api_base = "http://localhost:11434"
-end
-
 Girb.configure do |c|
-  c.model = 'llama3.2'
-  c.provider = Girb::Providers::RubyLlm.new(model: c.model)
+  c.debug = true  # デバッグ出力を有効化
+  c.custom_prompt = <<~PROMPT
+    破壊的操作の前に必ず確認してください。
+  PROMPT
 end
 ```
+
+注: ローカルプロバイダー（Ollama、GPUStack）使用時は`RubyLLM::Models.refresh!`が自動的に呼ばれます。
 
 ## 対応モデル
 
 サポートされているモデルの完全なリストは[RubyLLM Available Models](https://rubyllm.com/reference/available-models)を参照してください。
-
-## 使用方法
-
-インストールと設定が完了したら、通常通りgirbを使用するだけです:
-
-```bash
-girb
-```
 
 ## ライセンス
 

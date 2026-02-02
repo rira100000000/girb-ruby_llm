@@ -11,20 +11,41 @@ This gem allows you to use multiple LLM providers (OpenAI, Anthropic, Google Gem
 Add to your Gemfile:
 
 ```ruby
+gem 'girb'
 gem 'girb-ruby_llm'
-```
-
-Then run:
-
-```bash
-bundle install
 ```
 
 Or install directly:
 
 ```bash
-gem install girb-ruby_llm
+gem install girb girb-ruby_llm
 ```
+
+## Setup
+
+Set the provider, model, and your API key:
+
+```bash
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=gemini-2.5-flash  # specify the model to use
+export GEMINI_API_KEY=your-api-key  # or other provider's API key
+```
+
+Then start girb:
+
+```bash
+girb
+```
+
+### Using with regular irb
+
+Add to your `~/.irbrc`:
+
+```ruby
+require 'girb-ruby_llm'
+```
+
+Then use regular `irb` command.
 
 ## Configuration
 
@@ -68,6 +89,8 @@ Set your API key or endpoint as an environment variable:
 ### Using OpenAI
 
 ```bash
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=gpt-4o
 export OPENAI_API_KEY="sk-..."
 girb
 ```
@@ -75,6 +98,8 @@ girb
 ### Using Anthropic Claude
 
 ```bash
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=claude-sonnet-4-20250514
 export ANTHROPIC_API_KEY="sk-ant-..."
 girb
 ```
@@ -85,48 +110,44 @@ girb
 # Start Ollama first
 ollama serve
 
-# Set the API base URL
-export OLLAMA_API_BASE="http://localhost:11434"
+# Set the provider, model, and API base URL
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=llama3.2:latest
+export OLLAMA_API_BASE="http://localhost:11434/v1"
 girb
 ```
 
 ### Using OpenAI-compatible APIs (e.g., LM Studio, vLLM)
 
 ```bash
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=your-model-name
 export OPENAI_API_KEY="not-needed"  # Some require any non-empty value
 export OPENAI_API_BASE="http://localhost:1234/v1"
 girb
 ```
 
-### Manual Configuration
+### Advanced Configuration
 
-You can configure the provider manually in your `~/.irbrc`:
+For more control, configure Girb in your `~/.irbrc`:
 
 ```ruby
 # ~/.irbrc
 require 'girb-ruby_llm'
 
-RubyLLM.configure do |config|
-  config.ollama_api_base = "http://localhost:11434"
-end
-
 Girb.configure do |c|
-  c.model = 'llama3.2'
-  c.provider = Girb::Providers::RubyLlm.new(model: c.model)
+  c.debug = true  # Enable debug output
+  c.custom_prompt = <<~PROMPT
+    Always confirm before destructive operations.
+  PROMPT
 end
 ```
+
+Note: `RubyLLM::Models.refresh!` is automatically called for local providers (Ollama, GPUStack).
 
 ## Supported Models
 
 See [RubyLLM Available Models](https://rubyllm.com/reference/available-models) for the full list of supported models.
-
-## Usage
-
-Once installed and configured, simply use girb as normal:
-
-```bash
-girb
-```
 
 ## License
 

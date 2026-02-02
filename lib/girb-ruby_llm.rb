@@ -32,6 +32,9 @@ RUBY_LLM_CONFIG_MAP = {
 # Check if any RubyLLM config is available
 has_config = RUBY_LLM_CONFIG_MAP.any? { |env_var, _| ENV[env_var] }
 
+# Local providers that require Models.refresh!
+LOCAL_PROVIDERS = %w[OLLAMA_API_BASE GPUSTACK_API_BASE].freeze
+
 if has_config
   # Configure RubyLLM with all available environment variables
   RubyLLM.configure do |config|
@@ -40,9 +43,18 @@ if has_config
     end
   end
 
+  # Refresh models for local providers (Ollama, GPUStack)
+  if LOCAL_PROVIDERS.any? { |env_var| ENV[env_var] }
+    RubyLLM::Models.refresh!
+  end
+
+  model = ENV["GIRB_MODEL"]
+  unless model
+    warn "[girb-ruby_llm] GIRB_MODEL not set. Please specify a model."
+    warn "[girb-ruby_llm]   Example: export GIRB_MODEL=gemini-2.5-flash"
+  end
+
   Girb.configure do |c|
-    unless c.provider
-      c.provider = Girb::Providers::RubyLlm.new(model: c.model)
-    end
+    c.provider ||= Girb::Providers::RubyLlm.new(model: model)
   end
 end
