@@ -6,14 +6,14 @@ require "girb/providers/base"
 module Girb
   module Providers
     class RubyLlm < Base
-      DEFAULT_MODEL = "gpt-4o-mini"
-
-      def initialize(model: DEFAULT_MODEL)
+      def initialize(model: nil)
         @model = model
       end
 
       def chat(messages:, system_prompt:, tools:)
-        ruby_llm_chat = ::RubyLLM.chat(model: @model)
+        # Use specified model or RubyLLM's default
+        chat_options = @model ? { model: @model } : {}
+        ruby_llm_chat = ::RubyLLM.chat(**chat_options)
 
         # Set system prompt
         ruby_llm_chat.with_instructions(system_prompt) if system_prompt && !system_prompt.empty?

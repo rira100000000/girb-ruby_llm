@@ -26,27 +26,27 @@ gem install girb-ruby_llm
 
 ## 設定
 
-APIキーまたはエンドポイントを環境変数として設定します。最初に利用可能なキーに基づいて自動設定されます（優先順位順）:
+APIキーまたはエンドポイントを環境変数として設定します:
 
 ### クラウドプロバイダー
 
-| プロバイダー | 環境変数 | デフォルトモデル |
-|-------------|---------|----------------|
-| Anthropic | `ANTHROPIC_API_KEY` | `claude-sonnet-4-20250514` |
-| OpenAI | `OPENAI_API_KEY` | `gpt-4o-mini` |
-| Google Gemini | `GEMINI_API_KEY` | `gemini-2.0-flash` |
-| DeepSeek | `DEEPSEEK_API_KEY` | `deepseek-chat` |
-| Mistral | `MISTRAL_API_KEY` | `mistral-small-latest` |
-| OpenRouter | `OPENROUTER_API_KEY` | `openai/gpt-4o-mini` |
-| Perplexity | `PERPLEXITY_API_KEY` | `llama-3.1-sonar-small-128k-online` |
-| xAI | `XAI_API_KEY` | `grok-2` |
+| プロバイダー | 環境変数 |
+|-------------|---------|
+| Anthropic | `ANTHROPIC_API_KEY` |
+| OpenAI | `OPENAI_API_KEY` |
+| Google Gemini | `GEMINI_API_KEY` |
+| DeepSeek | `DEEPSEEK_API_KEY` |
+| Mistral | `MISTRAL_API_KEY` |
+| OpenRouter | `OPENROUTER_API_KEY` |
+| Perplexity | `PERPLEXITY_API_KEY` |
+| xAI | `XAI_API_KEY` |
 
 ### ローカルプロバイダー
 
-| プロバイダー | 環境変数 | デフォルトモデル |
-|-------------|---------|----------------|
-| Ollama | `OLLAMA_API_BASE` | `llama3.2` |
-| GPUStack | `GPUSTACK_API_BASE` | - |
+| プロバイダー | 環境変数 |
+|-------------|---------|
+| Ollama | `OLLAMA_API_BASE` |
+| GPUStack | `GPUSTACK_API_BASE` |
 
 ### 追加設定
 
@@ -98,7 +98,7 @@ girb
 
 ### 手動設定
 
-Rubyでプロバイダーを手動で設定することもできます:
+Rubyでプロバイダーを手動で設定できます:
 
 ```ruby
 require 'girb-ruby_llm'
@@ -108,7 +108,8 @@ RubyLLM.configure do |config|
 end
 
 Girb.configure do |c|
-  c.provider = Girb::Providers::RubyLlm.new(model: 'llama3.2')
+  c.model = 'llama3.2'
+  c.provider = Girb::Providers::RubyLlm.new(model: c.model)
 end
 ```
 

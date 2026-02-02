@@ -26,27 +26,27 @@ gem install girb-ruby_llm
 
 ## Configuration
 
-Set your API key or endpoint as an environment variable. The provider will auto-configure based on the first available key (in priority order):
+Set your API key or endpoint as an environment variable:
 
 ### Cloud Providers
 
-| Provider | Environment Variable | Default Model |
-|----------|---------------------|---------------|
-| Anthropic | `ANTHROPIC_API_KEY` | `claude-sonnet-4-20250514` |
-| OpenAI | `OPENAI_API_KEY` | `gpt-4o-mini` |
-| Google Gemini | `GEMINI_API_KEY` | `gemini-2.0-flash` |
-| DeepSeek | `DEEPSEEK_API_KEY` | `deepseek-chat` |
-| Mistral | `MISTRAL_API_KEY` | `mistral-small-latest` |
-| OpenRouter | `OPENROUTER_API_KEY` | `openai/gpt-4o-mini` |
-| Perplexity | `PERPLEXITY_API_KEY` | `llama-3.1-sonar-small-128k-online` |
-| xAI | `XAI_API_KEY` | `grok-2` |
+| Provider | Environment Variable |
+|----------|---------------------|
+| Anthropic | `ANTHROPIC_API_KEY` |
+| OpenAI | `OPENAI_API_KEY` |
+| Google Gemini | `GEMINI_API_KEY` |
+| DeepSeek | `DEEPSEEK_API_KEY` |
+| Mistral | `MISTRAL_API_KEY` |
+| OpenRouter | `OPENROUTER_API_KEY` |
+| Perplexity | `PERPLEXITY_API_KEY` |
+| xAI | `XAI_API_KEY` |
 
 ### Local Providers
 
-| Provider | Environment Variable | Default Model |
-|----------|---------------------|---------------|
-| Ollama | `OLLAMA_API_BASE` | `llama3.2` |
-| GPUStack | `GPUSTACK_API_BASE` | - |
+| Provider | Environment Variable |
+|----------|---------------------|
+| Ollama | `OLLAMA_API_BASE` |
+| GPUStack | `GPUSTACK_API_BASE` |
 
 ### Additional Configuration
 
@@ -98,7 +98,7 @@ girb
 
 ### Manual Configuration
 
-You can also configure the provider manually in Ruby:
+You can configure the provider manually in Ruby:
 
 ```ruby
 require 'girb-ruby_llm'
@@ -108,7 +108,8 @@ RubyLLM.configure do |config|
 end
 
 Girb.configure do |c|
-  c.provider = Girb::Providers::RubyLlm.new(model: 'llama3.2')
+  c.model = 'llama3.2'
+  c.provider = Girb::Providers::RubyLlm.new(model: c.model)
 end
 ```
 
