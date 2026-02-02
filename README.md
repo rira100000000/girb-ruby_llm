@@ -114,7 +114,7 @@ end
 
 ## Supported Models
 
-See [RubyLLM documentation](https://rubyllm.com) for the full list of supported models.
+See [RubyLLM Available Models](https://rubyllm.com/reference/available-models) for the full list of supported models.
 
 ## Usage
 

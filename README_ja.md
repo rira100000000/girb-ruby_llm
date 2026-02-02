@@ -114,7 +114,7 @@ end
 
 ## 対応モデル
 
-サポートされているモデルの完全なリストは[RubyLLMドキュメント](https://rubyllm.com)を参照してください。
+サポートされているモデルの完全なリストは[RubyLLM Available Models](https://rubyllm.com/reference/available-models)を参照してください。
 
 ## 使用方法
 
