@@ -114,16 +114,6 @@ end
 
 ## Supported Models
 
-Thanks to RubyLLM, this provider supports 800+ models from various providers:
-
-- **OpenAI**: GPT-4o, GPT-4o-mini, o1, o3-mini, etc.
-- **Anthropic**: Claude Opus 4, Claude Sonnet 4, Claude 3.5, etc.
-- **Google**: Gemini 2.0, Gemini 1.5, etc.
-- **DeepSeek**: DeepSeek-V3, DeepSeek-R1, etc.
-- **Mistral**: Mistral Large, Mistral Small, etc.
-- **Ollama**: Llama 3.2, Qwen, Phi, etc. (any local model)
-- **And more**: OpenRouter, Perplexity, xAI Grok, etc.
-
 See [RubyLLM documentation](https://rubyllm.com) for the full list of supported models.
 
 ## Usage

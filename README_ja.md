@@ -114,16 +114,6 @@ end
 
 ## 対応モデル
 
-RubyLLMのおかげで、このプロバイダーは様々なプロバイダーから800以上のモデルをサポートしています:
-
-- **OpenAI**: GPT-4o, GPT-4o-mini, o1, o3-miniなど
-- **Anthropic**: Claude Opus 4, Claude Sonnet 4, Claude 3.5など
-- **Google**: Gemini 2.0, Gemini 1.5など
-- **DeepSeek**: DeepSeek-V3, DeepSeek-R1など
-- **Mistral**: Mistral Large, Mistral Smallなど
-- **Ollama**: Llama 3.2, Qwen, Phiなど（任意のローカルモデル）
-- **その他**: OpenRouter, Perplexity, xAI Grokなど
-
 サポートされているモデルの完全なリストは[RubyLLMドキュメント](https://rubyllm.com)を参照してください。
 
 ## 使用方法
