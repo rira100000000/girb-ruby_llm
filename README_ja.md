@@ -6,44 +6,55 @@
 
 ## インストール
 
+### Railsプロジェクトの場合
+
 Gemfileに追加:
 
 ```ruby
-gem 'girb'
-gem 'girb-ruby_llm'
+group :development do
+  gem 'girb-ruby_llm'
+end
 ```
 
-または直接インストール:
+そして実行:
+
+```bash
+bundle install
+```
+
+プロジェクトルートに `.girbrc` ファイルを作成:
+
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
+
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'gemini-2.5-flash')
+end
+```
+
+これで `rails console` が自動的にgirbを読み込みます！
+
+### 非Railsプロジェクトの場合
+
+グローバルにインストール:
 
 ```bash
 gem install girb girb-ruby_llm
 ```
 
-## セットアップ
-
-プロバイダー、モデル、APIキーを設定:
-
-```bash
-export GIRB_PROVIDER=girb-ruby_llm
-export GIRB_MODEL=gemini-2.5-flash  # 使用するモデルを指定
-export GEMINI_API_KEY=your-api-key  # または他のプロバイダーのAPIキー
-```
-
-girbを起動:
-
-```bash
-girb
-```
-
-### 通常のirbで使用する場合
-
-`~/.irbrc` に追加:
+プロジェクトディレクトリに `.girbrc` ファイルを作成:
 
 ```ruby
+# .girbrc
 require 'girb-ruby_llm'
+
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'gemini-2.5-flash')
+end
 ```
 
-通常の `irb` コマンドで使用できます。
+`irb` の代わりに `girb` コマンドを使用します。
 
 ## 設定
 
@@ -84,56 +95,74 @@ APIキーまたはエンドポイントを環境変数として設定します:
 
 ## 使用例
 
+### Google Geminiを使用
+
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
+
+# GEMINI_API_KEY 環境変数を設定
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'gemini-2.5-flash')
+end
+```
+
 ### OpenAIを使用
 
-```bash
-export GIRB_PROVIDER=girb-ruby_llm
-export GIRB_MODEL=gpt-4o
-export OPENAI_API_KEY="sk-..."
-girb
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
+
+# OPENAI_API_KEY 環境変数を設定
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'gpt-4o')
+end
 ```
 
 ### Anthropic Claudeを使用
 
-```bash
-export GIRB_PROVIDER=girb-ruby_llm
-export GIRB_MODEL=claude-sonnet-4-20250514
-export ANTHROPIC_API_KEY="sk-ant-..."
-girb
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
+
+# ANTHROPIC_API_KEY 環境変数を設定
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'claude-sonnet-4-20250514')
+end
 ```
 
 ### Ollama（ローカル）を使用
 
-```bash
-# まずOllamaを起動
-ollama serve
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
 
-# プロバイダー、モデル、APIベースURLを設定
-export GIRB_PROVIDER=girb-ruby_llm
-export GIRB_MODEL=llama3.2:latest
-export OLLAMA_API_BASE="http://localhost:11434/v1"
-girb
+# OLLAMA_API_BASE 環境変数を設定（例: http://localhost:11434/v1）
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'llama3.2:latest')
+end
 ```
 
 ### OpenAI互換API（LM Studio、vLLMなど）を使用
 
-```bash
-export GIRB_PROVIDER=girb-ruby_llm
-export GIRB_MODEL=your-model-name
-export OPENAI_API_KEY="not-needed"  # 空でない値が必要な場合
-export OPENAI_API_BASE="http://localhost:1234/v1"
-girb
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
+
+# OPENAI_API_BASE と OPENAI_API_KEY 環境変数を設定
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'your-model-name')
+end
 ```
 
 ### 詳細設定
 
-より細かい制御が必要な場合、`~/.irbrc`でGirbを設定できます:
-
 ```ruby
-# ~/.irbrc
+# .girbrc
 require 'girb-ruby_llm'
 
 Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'gemini-2.5-flash')
   c.debug = true  # デバッグ出力を有効化
   c.custom_prompt = <<~PROMPT
     破壊的操作の前に必ず確認してください。
@@ -142,6 +171,17 @@ end
 ```
 
 注: ローカルプロバイダー（Ollama、GPUStack）使用時は`RubyLLM::Models.refresh!`が自動的に呼ばれます。
+
+## 代替: 環境変数での設定
+
+`girb` コマンドでは、`.girbrc` が見つからない場合に環境変数で設定することもできます:
+
+```bash
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=gemini-2.5-flash
+export GEMINI_API_KEY=your-api-key
+girb
+```
 
 ## 対応モデル
 

@@ -8,44 +8,55 @@ This gem allows you to use multiple LLM providers (OpenAI, Anthropic, Google Gem
 
 ## Installation
 
+### For Rails Projects
+
 Add to your Gemfile:
 
 ```ruby
-gem 'girb'
-gem 'girb-ruby_llm'
+group :development do
+  gem 'girb-ruby_llm'
+end
 ```
 
-Or install directly:
+Then run:
+
+```bash
+bundle install
+```
+
+Create a `.girbrc` file in your project root:
+
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
+
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'gemini-2.5-flash')
+end
+```
+
+Now `rails console` will automatically load girb!
+
+### For Non-Rails Projects
+
+Install globally:
 
 ```bash
 gem install girb girb-ruby_llm
 ```
 
-## Setup
-
-Set the provider, model, and your API key:
-
-```bash
-export GIRB_PROVIDER=girb-ruby_llm
-export GIRB_MODEL=gemini-2.5-flash  # specify the model to use
-export GEMINI_API_KEY=your-api-key  # or other provider's API key
-```
-
-Then start girb:
-
-```bash
-girb
-```
-
-### Using with regular irb
-
-Add to your `~/.irbrc`:
+Create a `.girbrc` file in your project directory:
 
 ```ruby
+# .girbrc
 require 'girb-ruby_llm'
+
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'gemini-2.5-flash')
+end
 ```
 
-Then use regular `irb` command.
+Then use `girb` command instead of `irb`.
 
 ## Configuration
 
@@ -86,56 +97,74 @@ Set your API key or endpoint as an environment variable:
 
 ## Examples
 
+### Using Google Gemini
+
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
+
+# Set GEMINI_API_KEY environment variable
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'gemini-2.5-flash')
+end
+```
+
 ### Using OpenAI
 
-```bash
-export GIRB_PROVIDER=girb-ruby_llm
-export GIRB_MODEL=gpt-4o
-export OPENAI_API_KEY="sk-..."
-girb
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
+
+# Set OPENAI_API_KEY environment variable
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'gpt-4o')
+end
 ```
 
 ### Using Anthropic Claude
 
-```bash
-export GIRB_PROVIDER=girb-ruby_llm
-export GIRB_MODEL=claude-sonnet-4-20250514
-export ANTHROPIC_API_KEY="sk-ant-..."
-girb
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
+
+# Set ANTHROPIC_API_KEY environment variable
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'claude-sonnet-4-20250514')
+end
 ```
 
 ### Using Ollama (Local)
 
-```bash
-# Start Ollama first
-ollama serve
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
 
-# Set the provider, model, and API base URL
-export GIRB_PROVIDER=girb-ruby_llm
-export GIRB_MODEL=llama3.2:latest
-export OLLAMA_API_BASE="http://localhost:11434/v1"
-girb
+# Set OLLAMA_API_BASE environment variable (e.g., http://localhost:11434/v1)
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'llama3.2:latest')
+end
 ```
 
 ### Using OpenAI-compatible APIs (e.g., LM Studio, vLLM)
 
-```bash
-export GIRB_PROVIDER=girb-ruby_llm
-export GIRB_MODEL=your-model-name
-export OPENAI_API_KEY="not-needed"  # Some require any non-empty value
-export OPENAI_API_BASE="http://localhost:1234/v1"
-girb
+```ruby
+# .girbrc
+require 'girb-ruby_llm'
+
+# Set OPENAI_API_BASE and OPENAI_API_KEY environment variables
+Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'your-model-name')
+end
 ```
 
 ### Advanced Configuration
 
-For more control, configure Girb in your `~/.irbrc`:
-
 ```ruby
-# ~/.irbrc
+# .girbrc
 require 'girb-ruby_llm'
 
 Girb.configure do |c|
+  c.provider = Girb::Providers::RubyLlm.new(model: 'gemini-2.5-flash')
   c.debug = true  # Enable debug output
   c.custom_prompt = <<~PROMPT
     Always confirm before destructive operations.
@@ -144,6 +173,17 @@ end
 ```
 
 Note: `RubyLLM::Models.refresh!` is automatically called for local providers (Ollama, GPUStack).
+
+## Alternative: Environment Variable Configuration
+
+For the `girb` command, you can also configure via environment variables (used when no `.girbrc` is found):
+
+```bash
+export GIRB_PROVIDER=girb-ruby_llm
+export GIRB_MODEL=gemini-2.5-flash
+export GEMINI_API_KEY=your-api-key
+girb
+```
 
 ## Supported Models
 
