@@ -6,11 +6,23 @@ require "girb/providers/base"
 module Girb
   module Providers
     class RubyLlm < Base
+      # Thread-local storage for current binding
+      def self.current_binding=(binding)
+        Thread.current[:girb_ruby_llm_binding] = binding
+      end
+
+      def self.current_binding
+        Thread.current[:girb_ruby_llm_binding]
+      end
+
       def initialize(model: nil)
         @model = model
       end
 
-      def chat(messages:, system_prompt:, tools:)
+      def chat(messages:, system_prompt:, tools:, binding: nil)
+        # Store binding for tool execution
+        self.class.current_binding = binding
+
         # Use specified model or RubyLLM's default
         chat_options = @model ? { model: @model } : {}
         ruby_llm_chat = ::RubyLLM.chat(**chat_options)
@@ -29,7 +41,7 @@ module Girb
         last_message = messages.last
         last_content = extract_content(last_message)
 
-        # Send the request
+        # Send the request - RubyLLM will auto-execute tools
         response = ruby_llm_chat.ask(last_content)
 
         parse_response(response)
@@ -37,6 +49,8 @@ module Girb
         Response.new(error: "API Error: #{e.message}")
       rescue StandardError => e
         Response.new(error: "Error: #{e.message}")
+      ensure
+        self.class.current_binding = nil
       end
 
       private
@@ -108,11 +122,41 @@ module Girb
                   required: required_params.include?(prop_name.to_s) || required_params.include?(prop_name)
           end
 
-          # Override name method to return the custom name
-          define_method(:name) { tool_name }
+          # Store tool_name for execute method
+          define_method(:girb_tool_name) { tool_name }
 
-          # Execute method (never actually called, just for tool definition)
-          define_method(:execute) { |**_args| "" }
+          # Execute method - actually execute the girb tool
+          define_method(:execute) do |**args|
+            tool_name_for_log = girb_tool_name
+
+            if Girb.configuration&.debug
+              args_str = args.map { |k, v| "#{k}: #{v.inspect}" }.join(", ")
+              puts "[girb] Tool: #{tool_name_for_log}(#{args_str})"
+            end
+
+            binding = Girb::Providers::RubyLlm.current_binding
+            girb_tool_class = Girb::Tools.find_tool(tool_name_for_log)
+
+            unless girb_tool_class
+              return { error: "Unknown tool: #{tool_name_for_log}" }
+            end
+
+            girb_tool = girb_tool_class.new
+
+            result = if binding
+                       girb_tool.execute(binding, **args)
+                     else
+                       { error: "No binding available for tool execution" }
+                     end
+
+            if Girb.configuration&.debug && result.is_a?(Hash) && result[:error]
+              puts "[girb] Tool error: #{result[:error]}"
+            end
+
+            result
+          rescue StandardError => e
+            { error: "Tool execution failed: #{e.class} - #{e.message}" }
+          end
         end
 
         tool_class.new
