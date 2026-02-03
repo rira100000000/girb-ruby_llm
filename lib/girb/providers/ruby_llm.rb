@@ -122,8 +122,9 @@ module Girb
                   required: required_params.include?(prop_name.to_s) || required_params.include?(prop_name)
           end
 
-          # Store tool_name for execute method
+          # Store tool_name for execute method and override name for RubyLLM
           define_method(:girb_tool_name) { tool_name }
+          define_method(:name) { tool_name }
 
           # Execute method - actually execute the girb tool
           define_method(:execute) do |**args|
