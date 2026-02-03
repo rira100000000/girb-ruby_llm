@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2] - 2026-02-03
+
+### Fixed
+
+- Fix tool names being empty strings in dynamic RubyLLM::Tool classes
+- Properly execute girb tools within RubyLLM's auto-execute framework
+
 ## [0.1.1] - 2026-02-03
 
 ### Added
