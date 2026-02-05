@@ -6,23 +6,11 @@ require "girb/providers/base"
 module Girb
   module Providers
     class RubyLlm < Base
-      # Thread-local storage for current binding
-      def self.current_binding=(binding)
-        Thread.current[:girb_ruby_llm_binding] = binding
-      end
-
-      def self.current_binding
-        Thread.current[:girb_ruby_llm_binding]
-      end
-
       def initialize(model: nil)
         @model = model
       end
 
       def chat(messages:, system_prompt:, tools:, binding: nil)
-        # Store binding for tool execution
-        self.class.current_binding = binding
-
         # Use specified model or RubyLLM's default
         chat_options = @model ? { model: @model } : {}
         ruby_llm_chat = ::RubyLLM.chat(**chat_options)
@@ -30,30 +18,40 @@ module Girb
         # Set system prompt
         ruby_llm_chat.with_instructions(system_prompt) if system_prompt && !system_prompt.empty?
 
-        # Add tools
+        # Add tool schemas (for API payload generation only, not auto-executed)
         tool_instances = build_tools(tools)
         tool_instances.each { |tool| ruby_llm_chat.with_tool(tool) }
 
-        # Add messages except the last user message
-        add_messages_to_chat(ruby_llm_chat, messages[0..-2])
+        # Add all messages to the chat
+        add_messages_to_chat(ruby_llm_chat, messages)
 
-        # Get the last user message
-        last_message = messages.last
-        last_content = extract_content(last_message)
-
-        # Send the request - RubyLLM will auto-execute tools
-        response = ruby_llm_chat.ask(last_content)
+        # Get raw response without auto-executing tools
+        response = raw_complete(ruby_llm_chat)
 
         parse_response(response)
       rescue Faraday::BadRequestError => e
         Response.new(error: "API Error: #{e.message}")
       rescue StandardError => e
         Response.new(error: "Error: #{e.message}")
-      ensure
-        self.class.current_binding = nil
       end
 
       private
+
+      # Call provider.complete() directly, bypassing RubyLLM's handle_tool_calls.
+      # This returns the raw response so the caller can handle tool execution.
+      def raw_complete(chat)
+        provider = chat.instance_variable_get(:@provider)
+        provider.complete(
+          chat.messages,
+          tools: chat.tools,
+          temperature: chat.instance_variable_get(:@temperature),
+          model: chat.model,
+          params: chat.params,
+          headers: chat.headers,
+          schema: chat.schema,
+          thinking: chat.instance_variable_get(:@thinking)
+        )
+      end
 
       def add_messages_to_chat(chat, messages)
         messages.each do |msg|
@@ -63,13 +61,13 @@ module Girb
           when :assistant
             chat.add_message(role: :assistant, content: msg[:content])
           when :tool_call
-            # Add as assistant message with tool_calls
+            id = msg[:id] || "call_#{SecureRandom.hex(12)}"
             chat.add_message(
               role: :assistant,
               content: nil,
               tool_calls: {
-                msg[:name] => ::RubyLLM::ToolCall.new(
-                  id: msg[:id] || "call_#{SecureRandom.hex(12)}",
+                id => ::RubyLLM::ToolCall.new(
+                  id: id,
                   name: msg[:name],
                   arguments: msg[:args]
                 )
@@ -82,15 +80,6 @@ module Girb
               tool_call_id: msg[:id] || "call_#{SecureRandom.hex(12)}"
             )
           end
-        end
-      end
-
-      def extract_content(message)
-        case message[:role]
-        when :user, :assistant
-          message[:content]
-        else
-          message[:content].to_s
         end
       end
 
@@ -107,11 +96,10 @@ module Girb
         tool_description = tool_def[:description]
         tool_parameters = tool_def[:parameters] || {}
 
-        # Create a dynamic tool class
+        # Create a dynamic tool class for schema generation only
         tool_class = Class.new(::RubyLLM::Tool) do
           description tool_description
 
-          # Define parameters
           properties = tool_parameters[:properties] || {}
           required_params = tool_parameters[:required] || []
 
@@ -122,41 +110,11 @@ module Girb
                   required: required_params.include?(prop_name.to_s) || required_params.include?(prop_name)
           end
 
-          # Store tool_name for execute method and override name for RubyLLM
-          define_method(:girb_tool_name) { tool_name }
           define_method(:name) { tool_name }
 
-          # Execute method - actually execute the girb tool
-          define_method(:execute) do |**args|
-            tool_name_for_log = girb_tool_name
-
-            if Girb.configuration&.debug
-              args_str = args.map { |k, v| "#{k}: #{v.inspect}" }.join(", ")
-              puts "[girb] Tool: #{tool_name_for_log}(#{args_str})"
-            end
-
-            binding = Girb::Providers::RubyLlm.current_binding
-            girb_tool_class = Girb::Tools.find_tool(tool_name_for_log)
-
-            unless girb_tool_class
-              return { error: "Unknown tool: #{tool_name_for_log}" }
-            end
-
-            girb_tool = girb_tool_class.new
-
-            result = if binding
-                       girb_tool.execute(binding, **args)
-                     else
-                       { error: "No binding available for tool execution" }
-                     end
-
-            if Girb.configuration&.debug && result.is_a?(Hash) && result[:error]
-              puts "[girb] Tool error: #{result[:error]}"
-            end
-
-            result
-          rescue StandardError => e
-            { error: "Tool execution failed: #{e.class} - #{e.message}" }
+          # Not used — tool execution is handled by the caller's tool loop
+          define_method(:execute) do |**_args|
+            raise "Tool execution should be handled by the caller, not by the provider"
           end
         end
 
@@ -177,6 +135,7 @@ module Girb
 
         response.tool_calls.map do |_id, tool_call|
           {
+            id: tool_call.id,
             name: tool_call.name.to_s,
             args: tool_call.arguments || {}
           }
