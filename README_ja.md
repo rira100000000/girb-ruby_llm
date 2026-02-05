@@ -115,7 +115,7 @@ require 'girb-ruby_llm'
 
 # OPENAI_API_KEY 環境変数を設定
 Girb.configure do |c|
-  c.provider = Girb::Providers::RubyLlm.new(model: 'gpt-4o')
+  c.provider = Girb::Providers::RubyLlm.new(model: 'gpt-5.2-2025-12-11')
 end
 ```
 
@@ -127,7 +127,7 @@ require 'girb-ruby_llm'
 
 # ANTHROPIC_API_KEY 環境変数を設定
 Girb.configure do |c|
-  c.provider = Girb::Providers::RubyLlm.new(model: 'claude-sonnet-4-20250514')
+  c.provider = Girb::Providers::RubyLlm.new(model: 'claude-opus-4-5')
 end
 ```
 

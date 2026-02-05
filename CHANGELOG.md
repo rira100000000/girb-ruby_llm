@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0] - 2026-02-05
+
+### Added
+
+- Debug gem (rdbg) support for AI-assisted debugging
+
 ## [0.1.2] - 2026-02-03
 
 ### Fixed
