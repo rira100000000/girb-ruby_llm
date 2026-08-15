@@ -62,15 +62,15 @@ module Girb
             chat.add_message(role: :assistant, content: msg[:content])
           when :tool_call
             id = msg[:id] || "call_#{SecureRandom.hex(12)}"
+            tool_call_opts = { id: id, name: msg[:name], arguments: msg[:args] }
+            if msg.dig(:metadata, :thought_signature)
+              tool_call_opts[:thought_signature] = msg[:metadata][:thought_signature]
+            end
             chat.add_message(
               role: :assistant,
               content: nil,
               tool_calls: {
-                id => ::RubyLLM::ToolCall.new(
-                  id: id,
-                  name: msg[:name],
-                  arguments: msg[:args]
-                )
+                id => ::RubyLLM::ToolCall.new(**tool_call_opts)
               }
             )
           when :tool_result
@@ -134,11 +134,15 @@ module Girb
         return [] unless response.tool_call?
 
         response.tool_calls.map do |_id, tool_call|
-          {
+          fc = {
             id: tool_call.id,
             name: tool_call.name.to_s,
             args: tool_call.arguments || {}
           }
+          if tool_call.respond_to?(:thought_signature) && tool_call.thought_signature
+            fc[:metadata] = { thought_signature: tool_call.thought_signature }
+          end
+          fc
         end
       end
     end

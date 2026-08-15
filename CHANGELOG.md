@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0] - 2026-02-07
+
+### Fixed
+
+- Fix Gemini 3 thought_signature error on function calls
+- Preserve provider-specific metadata (e.g. thought_signature) through tool call lifecycle
+
 ## [0.2.0] - 2026-02-05
 
 ### Added
